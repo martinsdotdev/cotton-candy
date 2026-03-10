@@ -1,0 +1,15 @@
+name: cotton-candy
+
+services:
+  cotton-candy:
+    container_name: cotton-candy
+    expose:
+      - 3000
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    environment:
+      TEST: TEST
+    ports:
+      - 3000:3000
+    restart: on-failure
