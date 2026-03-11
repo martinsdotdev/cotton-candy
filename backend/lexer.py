@@ -75,27 +75,55 @@ def detect_geometric(text):
 			return form
 	return None
 
+def extract_geometric(cmd, map):
+	geometric = {}
+	for ref in cmd.get('instrucao', []):
+		text = map[ref]
+		geo = detect_geometric(text)
+		if geo:
+			geometric[ref] = geo
+	return geometric
+
+def generate_script_dsl(script_text):
+	tokens = tokenize(script_text)
+	cmd = extract_cmd(tokens)
+	map = cmd_map(tokens, cmd)
+	geometric = extract_geometric(cmd, map)
+
+	result = []
+	for instrucao_ref in cmd.get('instrucao', []):
+		identifica_ref = cmd['identifica'][0]
+		geo = geometric.get(instrucao_ref, '')
+		result.append(f"draw({instrucao_ref},{identifica_ref},'{geo}')")
+	return result
+
+def generate_texto_dsl(script_text):
+	tokens = tokenize(script_text)
+	cmd = extract_cmd(tokens)
+	map = cmd_map(tokens, cmd)
+	geometric = extract_geometric(cmd, map)
+
+	result = []
+	for instrucao_ref in cmd.get('instrucao', []):
+		instrucao_text = map[instrucao_ref]
+		identifica_text = map[cmd['identifica'][0]]
+		geo = geometric.get(instrucao_ref, '')
+		result.append(f"draw('{instrucao_text}','{identifica_text}','{geo}')")
+	return result
+
 if __name__ == "__main__":
 	script_text = """	Eu sou o ${identifica[0]}Pedro${identifica}, gostaria de
 	${instrucao[0]}desenhar um quadrado${instrucao} e
 	${instrucao[1]}depois um círculo${instrucao}.
 	"""
 
-	tokens = tokenize(script_text)
-	cmd = extract_cmd(tokens)
-	map = cmd_map(tokens, cmd)
-
-	geometric = {}
-	for ref in cmd.get('instrucao', []):
-		text = map[ref]
-		shape = detect_geometric(text)
-		if shape:
-			geometric[ref] = shape
+	script_dsl = generate_script_dsl(script_text)
+	texto_dsl = generate_texto_dsl(script_text)
 
 	print("\n script DSL:")
-	print(f"draw({cmd['instrucao'][0]},{cmd['identifica'][0]},'{geometric[cmd['instrucao'][0]]}')")
-	print(f"draw({cmd['instrucao'][1]},{cmd['identifica'][0]},'{geometric[cmd['instrucao'][1]]}')")
+	for line in script_dsl:
+		print(line)
 
 	print("\n texto DSL:")
-	print(f"draw('{map[cmd['instrucao'][0]]}','{map[cmd['identifica'][0]]}','{geometric[cmd['instrucao'][0]]}')")
-	print(f"draw('{map[cmd['instrucao'][1]]}','{map[cmd['identifica'][0]]}','{geometric[cmd['instrucao'][1]]}')")
+	for line in texto_dsl:
+		print(line)
