@@ -1,0 +1,6 @@
+###
+POST http://127.0.0.1:8000/tokenize
+Content-Type: application/json
+{
+	"text": "Eu sou o ${identifica[0]}Paranha${identifica}, gostaria de ${instrucao[0]}desenhar um quadrado${instrucao} e ${identifica[1]}Pedro${identifica} ${instrucao[1]}depois um círculo${instrucao}" 
+}
