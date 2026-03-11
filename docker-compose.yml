@@ -9,7 +9,7 @@ services:
       context: ./
       dockerfile: Dockerfile
     environment:
-      TEST: TEST
+      PORT: 3000
     ports:
       - 3000:3000
     restart: on-failure
