@@ -13,7 +13,7 @@ DOCKER_COMPOSE		:= $(shell \
 		echo 'docker-compose'; \
 	fi) --project-directory $(PROJECT_DIRECTORY)
 
-SERVICES			:= cotton-candy
+SERVICES			:= cotton-candy backend
 
 COMPOSE_PROJECT_NAME:= cotton-candy
 
