@@ -1,0 +1,14 @@
+[project]
+name = "cotton-candy"
+
+[services.frontend]
+name = "cotton-candy-frontend"
+dockerfile = "./Dockerfile"
+port = 3000
+restart_policy = "on-failure"
+
+[services.backend]
+name = "cotton-candy-backend"
+dockerfile = "./backend/Dockerfile"
+port = 8000
+restart_policy = "on-failure"
