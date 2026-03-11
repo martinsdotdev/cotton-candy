@@ -13,3 +13,14 @@ services:
     ports:
       - 3000:3000
     restart: on-failure
+
+  backend:
+    container_name: cotton-candy-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    volumes:
+      - ./backend:/app
+    restart: on-failure

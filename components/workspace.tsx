@@ -40,7 +40,16 @@ export function Workspace() {
           <Editor
             className="h-full"
             placeholder="Eu sou o Pedro, gostaria de desenhar um quadrado e depois um círculo."
-            onTextChange={setTagged}
+            onTextChange={async (text) => {
+              setTagged(text)
+              const res = await fetch("http://localhost:8000/tokenize", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ input: text }),
+              })
+              const data = await res.json()
+              setResults(data.tokens.map((t: { type: string; text: string }) => `[${t.type}] ${t.text}`))
+            }}
           />
         )}
 
