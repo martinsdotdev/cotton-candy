@@ -1,4 +1,4 @@
-const VALID_TAGS = ["Identifica", "instrucao"];
+const VALID_TAGS = ["identifica", "instrucao"];
 
 const GEOMETRIC_FORMS = [
 	"quadrado", "círculo", "circulo", "triângulo", "triangulo",
@@ -62,13 +62,13 @@ export function parse(text: string): ParseResult {
 			break;
 		}
 
-		if (tagName === "Identifica") {
+		if (tagName === "identifica") {
 			current = { nome: content, instrucao: [] };
 			result.users.push(current);
 
 		} else if (tagName === "instrucao") {
 			if (!current) {
-				result.errors.push(`aviso: instrucao sem Identifica — fantasma criado`);
+				result.errors.push(`aviso: instrucao sem identifica — fantasma criado`);
 				current = { nome: "[fantasma]", instrucao: [] };
 				result.users.push(current);
 			}
