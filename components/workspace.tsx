@@ -42,13 +42,13 @@ export function Workspace() {
             placeholder="Eu sou o Pedro, gostaria de desenhar um quadrado e depois um círculo."
             onTextChange={async (text) => {
               setTagged(text)
-              const res = await fetch("http://localhost:8000/tokenize", {
+              const res = await fetch("/api", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ input: text }),
+                body: JSON.stringify({ text }),
               })
               const data = await res.json()
-              setResults(data.tokens.map((t: { type: string; text: string }) => `[${t.type}] ${t.text}`))
+              setResults(data.result.users.map((u: { nome: string; instrucao: string[] }) => `[${u.nome}] ${u.instrucao.join(", ")}`))
             }}
           />
         )}
