@@ -28,7 +28,7 @@ export function Workspace() {
     const [naturalText, setNaturalText] = useState("")
     const [dsl, setDsl] = useState("")
     const [results, setResults] = useState<ParseResult | null>(null)
-    
+
     return (
 	    <div className="flex h-full flex-col gap-4">
 	    <nav className="flex gap-1 rounded-lg border border-border bg-muted/50 p-1">
