@@ -16,10 +16,10 @@ export function Output({ results }: OutputProps) {
       </div>
     )
   }
-    
+
     return (
 	<>
 	    {results.users.map((user, i) => <CottonCanvas key={i} user={user}/>)}
-	</>  
+	</>
     )
 }

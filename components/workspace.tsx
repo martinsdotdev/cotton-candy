@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 
+import { stripTags, syncTaggedText } from "@/lib/tagged-text"
 import { cn } from "@/lib/utils"
 import { Editor } from "@/components/editor/editor"
 import { Script } from "@/components/script"
@@ -17,17 +18,6 @@ function formatDsl(result: ParseResult): string {
   })
   lines.push("", JSON.stringify(result, null, 2))
   return lines.join("\n")
-}
-
-function stripTags(text: string): string {
-  return text
-    .replace(/#\{[^}]+\}/g, "")
-    .replace(/\{[^}]+\}#/g, "")
-    .replace(/\$\{[^}]+\}/g, "")
-}
-
-function containsTags(text: string): boolean {
-  return /[#$]\{[^}]+\}/.test(text)
 }
 
 const tabs = ["Input", "Script", "Output"] as const
@@ -110,9 +100,7 @@ export function Workspace() {
             placeholder="Eu sou o Pedro, gostaria de desenhar um quadrado e depois um círculo."
             onTextChange={(text) => {
               setNaturalText(text)
-              setTagged((currentTagged) =>
-                containsTags(currentTagged) ? currentTagged : text
-              )
+              setTagged((currentTagged) => syncTaggedText(currentTagged, text))
             }}
           />
         )}

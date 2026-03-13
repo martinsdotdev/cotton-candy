@@ -1,7 +1,10 @@
 "use client"
 
-const textareaClass =
-  "flex-1 resize-none rounded-lg border border-border bg-card px-4 py-3 font-mono text-xs leading-relaxed outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/50"
+import { HighlightedTextarea } from "@/components/highlighted-textarea"
+import {
+  tokenizeDslLine,
+  tokenizeTaggedLine,
+} from "@/lib/script-highlighting"
 
 type ScriptProps = {
   tagged: string
@@ -23,12 +26,11 @@ export function Script({
           <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Tagged text
           </label>
-          <textarea
+          <HighlightedTextarea
             value={tagged}
-            onChange={(e) => onTaggedChange(e.target.value)}
-            className={textareaClass}
+            onChange={onTaggedChange}
             placeholder="I am #{identifica}Pedro{identifica}#, I would like to #{instrucao}draw a square{instrucao}#."
-            spellCheck={false}
+            tokenizeLine={tokenizeTaggedLine}
           />
         </div>
 
@@ -36,12 +38,11 @@ export function Script({
           <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Script DSL
           </label>
-          <textarea
+          <HighlightedTextarea
             value={dsl}
-            onChange={(e) => onDslChange(e.target.value)}
-            className={textareaClass}
-            placeholder={"draw(instrucao[0],identifica[0],'square');"}
-            spellCheck={false}
+            onChange={onDslChange}
+            placeholder="draw(instrucao[0],identifica[0],'square');"
+            tokenizeLine={tokenizeDslLine}
           />
         </div>
       </div>
