@@ -1,90 +1,111 @@
 "use client"
 
 import { useRef, useEffect } from "react"
+import type { Identifica } from "@/app/api/parser"
 
+const CANVAS_WIDTH = 300
+const CANVAS_HEIGHT = 200
+const SIZE = 28
 
-
-function getRandomBetween(min, max) {
-    return Math.floor(Math.random() * (max - min) + min);
+function rand(min: number, max: number) {
+	return Math.floor(Math.random() * (max - min) + min)
 }
 
-function getRandomPosition(maxWidth, maxHeight) {
-    return {
-	x: getRandomBetween(0, maxWidth),
-	y: getRandomBetween(0, maxHeight)
-    }
+function drawSquare(ctx: CanvasRenderingContext2D, x: number, y: number) {
+	ctx.fillRect(x - SIZE / 2, y - SIZE / 2, SIZE, SIZE)
 }
 
-function drawRetangle(context, position) {
-    const size = getRandomPosition(20, 20);
-    context.fillRect(position.x, position.y, size.x + 5, size.y + 5) 
+function drawRect(ctx: CanvasRenderingContext2D, x: number, y: number) {
+	ctx.fillRect(x - SIZE / 2, y - SIZE / 4, SIZE, SIZE / 2)
 }
 
-function drawCircle(context, position) {
-    const radius = getRandomBetween(5, 20);
-    console.log('radius: ' + radius)
-    context.beginPath()
-    context.ellipse(position.x, position.y, radius, radius, Math.PI / 4, 0, 2 * Math.PI)
-    context.fill()
+function drawCircle(ctx: CanvasRenderingContext2D, x: number, y: number) {
+	ctx.beginPath()
+	ctx.arc(x, y, SIZE / 2, 0, 2 * Math.PI)
+	ctx.fill()
 }
 
-function drawGeometry(context, position, geometry) {
-    console.log("drawGeometry " + geometry)
-    if(geometry == 'quadrado')
-	drawRetangle(context, position)
-    else if (geometry == 'circulo')
-	drawCircle(context, position)
+function drawEllipse(ctx: CanvasRenderingContext2D, x: number, y: number) {
+	ctx.beginPath()
+	ctx.ellipse(x, y, SIZE / 2, SIZE / 3, 0, 0, 2 * Math.PI)
+	ctx.fill()
 }
 
-
-/**
-  https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D
- */
-export function CottonCanvas(props: any) {
-    const name = props.user.nome;
-    const geometries = props.user.instrucao;
-    
-    const canvasRef = useRef(null);
-    const colorRef = useRef({
-	r: getRandomBetween(0, 255),
-	g: getRandomBetween(0, 255),
-	b: getRandomBetween(0, 255),
-    })
-    useEffect(() => {
-	
-	const canvas = canvasRef.current
-	const context = canvas.getContext('2d')
-	const canvasWidth = context.canvas.width
-	const canvasHeight= context.canvas.height;
-	const color = colorRef.current;
-	console.log(colorRef)
-	context.clearRect(0, 0, canvasWidth, canvasHeight);
-	const colorString = `#${color.r.toString(16)}${color.g.toString(16)}${color.b.toString(16)}`
-	
-	context.fillStyle = colorString;
-	
-	let position = getRandomPosition(canvasWidth - 40, canvasHeight - 20);
-	
-	context.fillText(name, position.x, position.y)
-	for (let geometry of geometries) {
-	    position = getRandomPosition(canvasWidth - 20, canvasHeight - 20);
-	    drawGeometry(context, position, geometry);
+function drawPolygon(ctx: CanvasRenderingContext2D, x: number, y: number, sides: number) {
+	ctx.beginPath()
+	for (let i = 0; i < sides; i++) {
+		const angle = (2 * Math.PI * i / sides) - Math.PI / 2
+		const px = x + (SIZE / 2) * Math.cos(angle)
+		const py = y + (SIZE / 2) * Math.sin(angle)
+		if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py)
 	}
-    }, [])
-    return (
-	<>
-	    <canvas ref={canvasRef} id='cotton-canvas'>
-		<p> :\( no canvas available </p>
-		<p> unable to draw on browser without canvas support</p>
-	    </canvas>
-	</>
-    )
+	ctx.closePath()
+	ctx.fill()
 }
 
+function drawStar(ctx: CanvasRenderingContext2D, x: number, y: number) {
+	const outer = SIZE / 2
+	const inner = SIZE / 4
+	ctx.beginPath()
+	for (let i = 0; i < 10; i++) {
+		const r = i % 2 === 0 ? outer : inner
+		const angle = (Math.PI * i / 5) - Math.PI / 2
+		const px = x + r * Math.cos(angle)
+		const py = y + r * Math.sin(angle)
+		if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py)
+	}
+	ctx.closePath()
+	ctx.fill()
+}
 
-/*
-  ${instrucao}desenho quadrado ${instrucao}
-  ${identifica}Leticia${identifica}${instrucao}desenho circulo${instrucao} ${instrucao}quadrado ${instrucao}
-  ${identifica}Pedro${identifica}${instrucao}desenho quadrado${instrucao}
-  
-  */
+const FORM_DRAW: Record<string, (ctx: CanvasRenderingContext2D, x: number, y: number) => void> = {
+	quadrado: drawSquare,
+	retangulo: drawRect,
+	circulo: drawCircle,
+	elipse: drawEllipse,
+	triangulo: (ctx, x, y) => drawPolygon(ctx, x, y, 3),
+	pentagono: (ctx, x, y) => drawPolygon(ctx, x, y, 5),
+	hexagono: (ctx, x, y) => drawPolygon(ctx, x, y, 6),
+	estrela: drawStar,
+}
+
+type Props = { user: Identifica }
+
+export function CottonCanvas({ user }: Props) {
+	const canvasRef = useRef<HTMLCanvasElement>(null)
+	const colorRef = useRef(`hsl(${rand(0, 360)}, 70%, 55%)`)
+
+	useEffect(() => {
+		const canvas = canvasRef.current!
+		const ctx = canvas.getContext('2d')!
+		ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
+		ctx.fillStyle = colorRef.current
+		ctx.font = '13px monospace'
+
+		const NAME_H = 24
+		ctx.fillText(user.nome, 8, 16)
+
+		const n = user.instrucao.length
+		const cols = Math.max(1, Math.ceil(Math.sqrt(n)))
+		const rows = Math.max(1, Math.ceil(n / cols))
+		const cellW = CANVAS_WIDTH / cols
+		const cellH = (CANVAS_HEIGHT - NAME_H) / rows
+
+		user.instrucao.forEach((form, i) => {
+			const col = i % cols
+			const row = Math.floor(i / cols)
+			const x = col * cellW + cellW / 2
+			const y = NAME_H + row * cellH + cellH / 2
+			FORM_DRAW[form]?.(ctx, x, y)
+		})
+	}, [user.nome, user.instrucao])
+
+	return (
+		<canvas
+			ref={canvasRef}
+			width={CANVAS_WIDTH}
+			height={CANVAS_HEIGHT}
+			className="rounded border border-border"
+		/>
+	)
+}

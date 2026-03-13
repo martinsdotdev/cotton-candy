@@ -6,7 +6,18 @@ import { cn } from "@/lib/utils"
 import { Editor } from "@/components/editor/editor"
 import { Script } from "@/components/script"
 import { Output } from "@/components/output"
+import type { ParseResult } from "@/app/api/parser"
 
+function formatDsl(result: ParseResult): string {
+    const lines: string[] = []
+    result.users.forEach((user, i) => {
+        user.instrucao.forEach((shape, j) => {
+            lines.push(`draw(identifica[${i}],instrucao[${j}],'${shape}');`)
+        })
+    })
+    lines.push('', JSON.stringify(result, null, 2))
+    return lines.join('\n')
+}
 
 const tabs = ["Input", "Script", "Output"] as const
 type Tab = (typeof tabs)[number]
@@ -16,7 +27,7 @@ export function Workspace() {
     const [tagged, setTagged] = useState("")
     const [naturalText, setNaturalText] = useState("")
     const [dsl, setDsl] = useState("")
-    const [results, setResults] = useState<string[]>([])
+    const [results, setResults] = useState<ParseResult | null>(null)
     
     return (
 	    <div className="flex h-full flex-col gap-4">
@@ -61,9 +72,8 @@ export function Workspace() {
 		    body: JSON.stringify({ text: taggedInput }),
 		})
 		const data = await res.json()
-		console.log(data.result)
-		//if(data.users.result.errors[0] != 'OK')
 		setResults(data.result)
+		setDsl(formatDsl(data.result))
 	    }}
             onDslChange={setDsl}
 		/>

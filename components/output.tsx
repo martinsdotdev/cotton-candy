@@ -1,13 +1,13 @@
 import { CottonCanvas } from "@/components/cottonCanvas"
+import type { ParseResult } from "@/app/api/parser"
 
 
 type OutputProps = {
-  results: string[]
+  results: ParseResult | null
 }
 
 export function Output({ results }: OutputProps) {
-    console.log(results)
-  if (results.users == null || results.users === 0) {
+  if (results == null || results.users.length === 0) {
     return (
       <div className="flex h-full items-center justify-center rounded-lg border border-border bg-card">
         <p className="text-sm text-muted-foreground italic">
