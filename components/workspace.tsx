@@ -2,12 +2,44 @@
 
 import { useEffect, useState } from "react"
 
-import { stripTags, syncTaggedText } from "@/lib/tagged-text"
+import { stripTags } from "@/lib/tagged-text"
 import { cn } from "@/lib/utils"
 import { Editor } from "@/components/editor/editor"
 import { Script } from "@/components/script"
 import { Output } from "@/components/output"
 import type { ParseResult } from "@/app/api/parser"
+import nlp from "compromise"
+
+const shapes = [
+	"quadrado", "circulo", "triangulo",
+	"retangulo", "pentagono", "hexagono",
+	"elipse", "estrela",
+];
+
+export function tagText(text: string) {
+  let result = text
+  const doc = nlp(text)
+
+  const people = doc.people().out("array")
+
+  people.forEach((name: string) => {
+    const regex = new RegExp(`\\b${name}\\b`, "gi")
+    result = result.replace(
+      regex,
+      `#{identifica}${name}{identifica}#`
+    )
+  })
+
+  shapes.forEach((shape) => {
+    const regex = new RegExp(`\\b${shape}\\b`, "gi")
+    result = result.replace(
+      regex,
+      `#{instrucao}${shape}{instrucao}#`
+    )
+  })
+
+  return result
+}
 
 function formatDsl(result: ParseResult): string {
   const lines: string[] = []
@@ -100,7 +132,7 @@ export function Workspace() {
             placeholder="Eu sou o Pedro, gostaria de desenhar um quadrado e depois um círculo."
             onTextChange={(text) => {
               setNaturalText(text)
-              setTagged((currentTagged) => syncTaggedText(currentTagged, text))
+              setTagged(() => tagText(text))
             }}
           />
         )}
